@@ -3,7 +3,7 @@ name: Deploy Application
 on: 
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-server:
@@ -14,20 +14,20 @@ jobs:
       - name: Login to docker hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}     
       - name: Build Docker Image
-        run: docker build -t 04aj/backend .
+        run: docker build -t 04aj/server .
       - name: Publish Image to docker hub
-        run: docker push 04aj/backend:latest 
+        run: docker push 04aj/server:latest 
  
   deploy-server:
     needs: build-server
     runs-on: self-hosted 
     steps:
       - name: Pull image from docker hub
-        run: docker pull 04aj/backend:latest 
+        run: docker pull 04aj/server:latest 
       - name: Delete old container
-        run: docker rm -f backend-container  
+        run: docker rm -f server-container  
       - name: Run Docker Container
-        run: docker run -d -p 4000:4000 --name backend-container -e MONGO_PASSWORD='${{ secrets.MONGO_PASSWORD }}' 04aj/backend
+        run: docker run -d -p 4000:4000 --name server-container -e MONGO_PASSWORD='${{ secrets.MONGO_PASSWORD }}' 04aj/server
   
   build-client:
     needs: deploy-server
@@ -38,17 +38,17 @@ jobs:
       - name: Login to docker hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}     
       - name: Build Docker Image
-        run: docker build -t 04aj/frontend --build-arg REACT_APP_NODE_ENV='production' --build-arg REACT_APP_SERVER_BASE_URL='${{ secrets.REACT_APP_SERVER_BASE_URL }}'  .
+        run: docker build -t 04aj/client --build-arg REACT_APP_NODE_ENV='production' --build-arg REACT_APP_SERVER_BASE_URL='${{ secrets.REACT_APP_SERVER_BASE_URL }}'  .
       - name: Publish Image to docker hub
-        run: docker push 04aj/frontend:latest 
+        run: docker push 04aj/client:latest 
  
   deploy-client:
     needs: build-client
     runs-on: self-hosted 
     steps:
       - name: Pull image from docker hub
-        run: docker pull 04aj/frontend:latest 
+        run: docker pull 04aj/client:latest 
       - name: Delete old container
-        run: docker rm -f frontend-container
+        run: docker rm -f client-container
       - name: Run Docker Container
-        run: docker run -d -p 3000:80 --name frontend-container 04aj/frontend
+        run: docker run -d -p 3000:80 --name client-container 04aj/client
