@@ -7,7 +7,6 @@ import './App.css'
 import { UserInfo } from '../types';
 
 function App() {
-  const [count, setCount] = useState(0)
   const [recordData, setRecordData] = useState<UserInfo[]>([]);
   const base_url = import.meta.env.VITE_REACT_APP_NODE_ENV === 'development' ? import.meta.env.VITE_REACT_APP_LOCAL_BASE_URL : import.meta.env.VITE_REACT_APP_SERVER_BASE_URL;
   console.log(base_url);
