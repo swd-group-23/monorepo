@@ -1,10 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import DetailsCardComponent from './components/DetailsCardComponent';
+import axios from 'axios';
 import './App.css'
+import { UserInfo } from '../types';
 
 function App() {
   const [count, setCount] = useState(0)
+  const [recordData, setRecordData] = useState<UserInfo[]>([]);
+  const base_url = import.meta.env.VITE_REACT_APP_NODE_ENV === 'development' ? import.meta.env.VITE_REACT_APP_LOCAL_BASE_URL : import.meta.env.VITE_REACT_APP_SERVER_BASE_URL;
+  console.log(base_url);
+  useEffect(() => {
+    axios.get<UserInfo[]>(`${base_url}/getUsers`).then(res => { setRecordData(res.data);}).catch(err => alert(`Some error occured ==>${err}`));
+  
+   }, []);
+ 
 
   return (
     <>
@@ -17,17 +28,16 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className="col">
+            <h3 className="text-center">Users List</h3>
+            <ul>
+              {recordData.map((r, i) => <li key={i}><DetailsCardComponent userInfo={{
+                name:r.name,
+                email: r.email,
+                date: r.date
+              }} /></li>)}
+            </ul>
+          </div>
     </>
   )
 }
